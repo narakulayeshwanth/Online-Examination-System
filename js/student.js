@@ -28,14 +28,21 @@ if (enterTestForm) {
             const response = await apiCall('/student/enter-test', 'POST', { test_code: testCode });
 
             if (response.success) {
-                // Store full exam data including test_code in localStorage
-                const examData = {
-                    ...response.data.test,
-                    test_code: testCode  // Attach the test_code so exam.js can resume
-                };
-                localStorage.setItem('currentExam', JSON.stringify(examData));
-                window.location.href = 'exam.html';
-            } else {
+    console.log("ENTER TEST RESPONSE:", response);
+
+    // ✅ Save attemptId
+    const attemptId = response.data.attempt_id || response.data.id;
+    localStorage.setItem("attemptId", attemptId);
+
+    // ✅ Save exam data
+    const examData = {
+        ...response.data.test,
+        test_code: testCode
+    };
+    localStorage.setItem('currentExam', JSON.stringify(examData));
+
+    window.location.href = 'exam.html';
+} else {
                 showAlert(response.message || 'Error joining test', 'error');
             }
         } catch (error) {
