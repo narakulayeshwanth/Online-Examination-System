@@ -31,8 +31,15 @@ if (enterTestForm) {
     console.log("ENTER TEST RESPONSE:", response);
 
     // ✅ Save attemptId
-    const attemptId = response.data.attempt_id || response.data.id;
-    localStorage.setItem("attemptId", attemptId);
+   const attemptId = response.data.attempt?.id;
+
+if (!attemptId) {
+    console.error("Attempt ID missing!", response);
+    showAlert("Failed to start exam properly", "error");
+    return;
+}
+
+localStorage.setItem("attemptId", attemptId);
 
     // ✅ Save exam data
     const examData = {
