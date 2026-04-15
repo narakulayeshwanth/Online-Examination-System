@@ -163,27 +163,46 @@ if (examForm) {
 }
 
 async function submitExam(auto = false) {
-    const button = document.querySelector('button[type="submit"]');
-    if (button) {
-        button.disabled = true;
-        button.textContent = 'Submitting...';
-    }
+    try {
+        const button = document.querySelector('button[type="submit"]');
+        if (button) {
+            button.disabled = true;
+            button.textContent = 'Submitting...';
+        }
 
-    const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+        const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
 
-    const response = await apiCall('/student/submit-test', 'POST', {
-        test_id: examMetadata.id,
-        attempt_id: attemptId,
-        answers: currentAnswers,
-        time_taken: Math.min(elapsedSeconds, totalTimeSeconds)
-    });
+        // ✅ CHECK HERE
+        if (!currentAnswers || currentAnswers.length === 0) {
+            alert("Please answer at least one question");
+            return;
+        }
 
-    if (response.success) {
-        localStorage.removeItem('currentExam');
-        window.location.href = `result.html?id=${response.data.id}`;
-    } else {
-        showAlert(response.message, 'error');
-        setTimeout(() => window.location.href = 'student.html', 2000);
+        // ✅ DEBUG
+        console.log("SUBMIT DATA:", {
+            test_id: examMetadata.id,
+            attempt_id: attemptId,
+            answers: currentAnswers,
+            time_taken: elapsedSeconds
+        });
+
+        const response = await apiCall('/student/submit-test', 'POST', {
+            test_id: examMetadata.id,
+            attempt_id: attemptId,
+            answers: currentAnswers,
+            time_taken: Math.min(elapsedSeconds, totalTimeSeconds)
+        });
+
+        if (response.success) {
+            localStorage.removeItem('currentExam');
+            window.location.href = `result.html?id=${response.data.id}`;
+        } else {
+            alert(response.message || "Submit failed");
+        }
+
+    } catch (error) {
+        console.error("SUBMIT ERROR:", error);
+        alert("Server error while submitting exam");
     }
 }
 
