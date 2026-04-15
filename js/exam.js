@@ -40,7 +40,7 @@ async function initExam() {
     renderQuestions(test.questions, currentAnswers);
     startTimer();
     startAutoSave();
-};
+}
     
     
 
