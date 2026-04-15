@@ -22,27 +22,27 @@ if (!examMetadata) {
 }
 
 async function initExam() {
-    // Sync with backend to get attempt state (Resume Logic)
-    const response = await apiCall('/student/enter-test', 'POST', { test_code: examMetadata.test_code });
-    
-    if (!response.success) {
-        showAlert(response.message, 'error');
-        setTimeout(() => window.location.href = 'student.html', 2000);
+    // ✅ Use stored data instead of calling backend again
+    attemptId = localStorage.getItem("attemptId");
+
+    if (!attemptId) {
+        alert("No attempt found. Please re-enter test.");
+        window.location.href = "student.html";
         return;
     }
 
-    const { test, attempt } = response.data;
-    attemptId = attempt.id;
-    // Fallback to now if start_time is null (e.g. old attempts without stored start_time)
-    startTime = attempt.start_time ? new Date(attempt.start_time).getTime() : Date.now();
+    const test = examMetadata;
+
+    startTime = Date.now();
     totalTimeSeconds = test.timer_minutes * 60;
-    currentAnswers = attempt.saved_answers || [];
-    violationCount = attempt.violation_count || 0;
+    currentAnswers = [];
 
     renderQuestions(test.questions, currentAnswers);
     startTimer();
     startAutoSave();
-}
+};
+    
+    
 
 function renderQuestions(questions, savedAnswers) {
     const container = document.getElementById('questions-list');
